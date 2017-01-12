@@ -1123,7 +1123,7 @@ public class MainActivity extends MKDelegateActivity implements ChatActivity, Co
             final MessageItem messageItem = (MessageItem) item;
             downloadFile(messageItem.getMessageId(), messageItem.getFilePath(),
                     messageItem.getJsonProps(), messageItem.getSenderId(),
-                    messageItem.getMessageTimestampOrder(), state.getActiveConversationId());
+                    messageItem.getMessageTimestampOrder(), messageItem.getConversationId());
         }
 
     }
@@ -1171,10 +1171,11 @@ public class MainActivity extends MKDelegateActivity implements ChatActivity, Co
     @Override
     public void onBackPressed() {
         final Stack stack = state.mkFragmentStack;
-        if (!stack.isEmpty() && stack.peek() == MonkeyFragmentManager.FragmentTypes.chat) //user exit chat, clear active conversation
+        if (!stack.isEmpty() && stack.peek() == MonkeyFragmentManager.FragmentTypes.chat) { //user exit chat, clear active conversation
             updateClosedConversation();
+            state.activeConversationItem = null;
+        }
 
-        state.activeConversationItem = null;
         super.onBackPressed();
     }
 
@@ -1193,8 +1194,8 @@ public class MainActivity extends MKDelegateActivity implements ChatActivity, Co
         if(voiceNotePlayer != null)
             voiceNotePlayer.setupNotificationControl(new PlaybackNotification(R.mipmap.ic_launcher,
                     " Playing voice note"));
-        monkeyChatFragment.setInputListener(null);
-        monkeyChatFragment = null;
+        //monkeyChatFragment.setInputListener(null);
+        //monkeyChatFragment = null;
     }
 
     /** CONVERSATION ACTIVITY METHODS **/
@@ -1302,11 +1303,8 @@ public class MainActivity extends MKDelegateActivity implements ChatActivity, Co
     @Nullable
     @Override
     public ArrayList<MonkeyInfo> getInfo(String conversationId) {
-        if(monkeyChatFragment == null){
-            return null;
-        }
 
-        if(monkeyChatFragment.getConversationId().contains("G:")){
+        if(conversationId.contains("G:")){
             return state.groupData.getInfoList();
         }
         Iterator it = state.conversations.iterator();
